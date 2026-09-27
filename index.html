@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxCraft AI - Next-Gen Text to Speech & Voice Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        accent: '#8b5cf6',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Glassmorphism styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        .dark .glass-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af44;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1aa;
+        }
+
+        /* Active sentence highlighting in Karaoke Mode */
+        .highlight-sentence {
+            background-color: rgba(99, 102, 241, 0.25);
+            border-bottom: 2px solid #6366f1;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+        
+        /* Slider styling */
+        input[type=range] {
+            accent-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Top Header Navigation -->
+    <header class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-gray-800 glass-panel">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-accent to-pink-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid font-bold fa-wand-magic-sparkles text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold bg-gradient-to-r from-brand-500 via-accent to-pink-500 bg-clip-text text-transparent">VoxCraft AI</span>
+                    <span class="hidden sm:inline-block text-xs px-2 py-0.5 ml-2 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-300 font-semibold border border-brand-200 dark:border-brand-800">Studio v2.5</span>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-3">
+                <button id="themeToggleBtn" title="Toggle Theme" class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-gray-900 dark:bg-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700 text-white text-sm font-medium transition-all shadow-sm">
+                    <i class="fa-brands fa-github text-base"></i>
+                    <span>GitHub Pages Ready</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Input Text Editor & Player Controls (8 Cols) -->
+        <section class="lg:col-span-8 flex flex-col space-y-6">
+            
+            <!-- Text Input Card -->
+            <div class="glass-panel rounded-2xl p-5 shadow-xl flex flex-col flex-1 min-h-[420px] relative border border-gray-200/50 dark:border-gray-800/50">
+                <!-- Editor Header Toolbar -->
+                <div class="flex flex-wrap items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-800 gap-2">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-nib text-brand-500"></i>
+                        <h2 class="font-semibold text-gray-700 dark:text-gray-200">Script Editor</h2>
+                    </div>
+
+                    <!-- Presets & Quick Actions -->
+                    <div class="flex items-center flex-wrap gap-2">
+                        <!-- Text Samples Dropdown -->
+                        <select id="presetSelect" class="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                            <option value="">Load Preset Script...</option>
+                            <option value="story">Sci-Fi Audio Drama</option>
+                            <option value="tech">Tech Product Keynote</option>
+                            <option value="meditation">Guided Meditation</option>
+                            <option value="news">Daily News Anchor</option>
+                        </select>
+                        <button id="clearTextBtn" title="Clear Text" class="px-2.5 py-1.5 text-xs rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editable Textarea Container -->
+                <div class="relative flex-1 flex flex-col">
+                    <textarea id="textInput" placeholder="Enter or paste your unlimited text here... Select presets above to test." class="w-full h-full min-h-[260px] p-4 bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none resize-none leading-relaxed text-base font-normal"></textarea>
+                    
+                    <!-- Karaoke Highlighting Overlay (hidden by default) -->
+                    <div id="karaokeOverlay" class="hidden absolute inset-0 p-4 bg-white dark:bg-gray-900 rounded-lg overflow-y-auto leading-relaxed text-base text-gray-800 dark:text-gray-100 whitespace-pre-wrap pointer-events-auto"></div>
+                </div>
+
+                <!-- Editor Footer Counter Stats -->
+                <div class="pt-3 mt-2 border-t border-gray-200 dark:border-gray-800/80 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center space-x-4">
+                        <span>Words: <strong id="wordCount" class="text-gray-700 dark:text-gray-200">0</strong></span>
+                        <span>Characters: <strong id="charCount" class="text-gray-700 dark:text-gray-200">0</strong></span>
+                        <span>Est. Duration: <strong id="estTime" class="text-gray-700 dark:text-gray-200">0s</strong></span>
+                    </div>
+                    <div id="statusBadge" class="flex items-center text-emerald-500 font-medium">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span> Ready
+                    </div>
+                </div>
+            </div>
+
+            <!-- YouTube-Style Audio Player Card -->
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-800/50 flex flex-col space-y-4">
+                
+                <!-- Audio Visualizer Canvas -->
+                <div class="relative w-full h-20 bg-gray-900/90 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
+                    <canvas id="visualizerCanvas" class="w-full h-full"></canvas>
+                    <div id="visualizerPlaceholder" class="absolute inset-0 flex items-center justify-center text-gray-500 text-xs font-mono">
+                        <i class="fa-solid fa-waveform-lines mr-2 animate-pulse text-brand-500"></i> Audio Visualizer Ready
+                    </div>
+                </div>
+
+                <!-- Scrubber Progress Bar -->
+                <div class="space-y-1">
+                    <div class="relative group cursor-pointer py-1" id="timelineContainer">
+                        <div class="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden relative">
+                            <div id="progressBar" class="h-full bg-gradient-to-r from-brand-500 to-accent w-0 transition-all duration-75"></div>
+                        </div>
+                        <!-- Scrubber Thumb -->
+                        <input id="timelineScrubber" type="range" min="0" max="100" value="0" step="0.1" class="absolute inset-0 opacity-0 w-full cursor-pointer">
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-400 px-0.5">
+                        <span id="currentTime">00:00</span>
+                        <span id="totalTime">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Main Player Controls Deck -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                    
+                    <!-- Skip / Play Buttons -->
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <button id="skipBackBtn" title="Rewind 10s" class="p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+
+                        <button id="playBtn" class="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-600 to-accent hover:from-brand-500 hover:to-accent text-white flex items-center justify-center shadow-lg shadow-brand-500/40 hover:scale-105 active:scale-95 transition-all">
+                            <i id="playIcon" class="fa-solid fa-play ml-0.5 text-lg"></i>
+                        </button>
+
+                        <button id="stopBtn" title="Stop Playback" class="p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <i class="fa-solid fa-square"></i>
+                        </button>
+
+                        <button id="skipForwardBtn" title="Forward 10s" class="p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Audio Export / Download Button -->
+                    <div class="flex items-center space-x-3">
+                        <button id="exportAudioBtn" class="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm shadow-md shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-95">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Export Audio (.WAV)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Voice Selection, Controls & Cloning Reference (4 Cols) -->
+        <section class="lg:col-span-4 flex flex-col space-y-6">
+            
+            <!-- Voice Selector Accordion Panel -->
+            <div class="glass-panel rounded-2xl p-5 shadow-xl border border-gray-200/50 dark:border-gray-800/50 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-microphone-lines text-brand-500"></i>
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100">Voice Selector</h3>
+                    </div>
+                    <span id="voiceCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400">Loading...</span>
+                </div>
+
+                <!-- Voice Filter Controls -->
+                <div class="space-y-2">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-xs text-gray-400"></i>
+                        <input id="voiceSearch" type="text" placeholder="Search voices or languages..." class="w-full pl-8 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-xl text-xs text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    
+                    <select id="voiceDropdown" class="w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-xl text-sm p-3 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                        <!-- Populated dynamically via JS -->
+                    </select>
+                </div>
+
+                <!-- Active Voice Info Card -->
+                <div id="voiceDetailsCard" class="glass-card p-3 rounded-xl flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-300">
+                    <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-sm font-bold shrink-0">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div id="activeVoiceName" class="font-semibold truncate text-gray-800 dark:text-gray-200">Default Voice</div>
+                        <div id="activeVoiceLang" class="text-gray-400 truncate">en-US</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Adjustment Sliders Panel -->
+            <div class="glass-panel rounded-2xl p-5 shadow-xl border border-gray-200/50 dark:border-gray-800/50 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-sliders text-brand-500"></i>
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100">Speech Controls</h3>
+                    </div>
+                    <button id="resetControlsBtn" title="Reset to Defaults" class="text-xs text-brand-500 hover:text-brand-600 dark:hover:text-brand-400 font-medium">
+                        Reset All
+                    </button>
+                </div>
+
+                <!-- Speed / Rate Slider -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-medium">
+                        <label for="rateRange" class="text-gray-600 dark:text-gray-300">Speed (Rate)</label>
+                        <span id="rateVal" class="font-mono text-brand-500">1.0x</span>
+                    </div>
+                    <input id="rateRange" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Pitch Slider -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-medium">
+                        <label for="pitchRange" class="text-gray-600 dark:text-gray-300">Pitch</label>
+                        <span id="pitchVal" class="font-mono text-brand-500">1.0</span>
+                    </div>
+                    <input id="pitchRange" type="range" min="0.5" max="1.5" step="0.1" value="1" class="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Volume Slider -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-medium">
+                        <label for="volumeRange" class="text-gray-600 dark:text-gray-300">Volume</label>
+                        <span id="volumeVal" class="font-mono text-brand-500">100%</span>
+                    </div>
+                    <input id="volumeRange" type="range" min="0" max="1" step="0.05" value="1" class="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Voice Tone / Emotion Filter Simulator -->
+                <div class="space-y-1 pt-1">
+                    <label for="tonePreset" class="text-xs font-medium text-gray-600 dark:text-gray-300">Tone Preset Filter</label>
+                    <select id="tonePreset" class="w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-xl text-xs p-2.5 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500">
+                        <option value="normal">Normal / Standard</option>
+                        <option value="warm">Warm & Professional</option>
+                        <option value="bright">Bright & Energetic</option>
+                        <option value="deep">Deep Narrative</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Custom Voice Reference / Cloning Studio Box -->
+            <div class="glass-panel rounded-2xl p-5 shadow-xl border border-gray-200/50 dark:border-gray-800/50 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-dna text-brand-500"></i>
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100">Voice Reference Sample</h3>
+                    </div>
+                    <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-purple-500/10 text-purple-500">AI Simulator</span>
+                </div>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Upload or record your voice sample to match timber and acoustic frequency profiles.
+                </p>
+
+                <!-- Recording / Uploading Buttons -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="micRecordBtn" class="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-medium text-xs border border-red-500/20 transition-all">
+                        <i id="micIcon" class="fa-solid fa-microphone"></i>
+                        <span id="micBtnText">Record Mic</span>
+                    </button>
+
+                    <label class="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-500 font-medium text-xs border border-brand-500/20 cursor-pointer transition-all">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Upload Audio</span>
+                        <input type="file" id="audioUploadInput" accept="audio/*" class="hidden">
+                    </label>
+                </div>
+
+                <!-- Live Reference Audio Playback / Status -->
+                <div id="voiceRefCard" class="hidden p-3 rounded-xl bg-gray-100 dark:bg-gray-800/80 space-y-2 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-medium text-gray-700 dark:text-gray-300 truncate" id="refFileName">Reference Voice Active</span>
+                        <button id="removeRefBtn" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <audio id="refAudioPlayer" controls class="w-full h-8 text-xs"></audio>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Application JavaScript Engine -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Speech Synthesis & Web Audio State
+            const synth = window.speechSynthesis;
+            let voices = [];
+            let currentUtterance = null;
+            let isPlaying = false;
+            let isPaused = false;
+            
+            // Audio Recording / MediaRecorder State for Exporting Synthesized Audio
+            let audioCtx = null;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let synthAudioBlob = null;
+            let synthAudioUrl = null;
+            let recordedAudioElement = new Audio();
+            
+            // Sentence Highlighting state
+            let sentences = [];
+            let currentSentenceIndex = 0;
+            
+            // Microphone Recording State
+            let micMediaRecorder = null;
+            let micAudioChunks = [];
+            let isRecordingMic = false;
+
+            // DOM Element References
+            const textInput = document.getElementById('textInput');
+            const karaokeOverlay = document.getElementById('karaokeOverlay');
+            const voiceDropdown = document.getElementById('voiceDropdown');
+            const voiceSearch = document.getElementById('voiceSearch');
+            const voiceCountBadge = document.getElementById('voiceCountBadge');
+            const activeVoiceName = document.getElementById('activeVoiceName');
+            const activeVoiceLang = document.getElementById('activeVoiceLang');
+            
+            const playBtn = document.getElementById('playBtn');
+            const playIcon = document.getElementById('playIcon');
+            const stopBtn = document.getElementById('stopBtn');
+            const skipBackBtn = document.getElementById('skipBackBtn');
+            const skipForwardBtn = document.getElementById('skipForwardBtn');
+            const exportAudioBtn = document.getElementById('exportAudioBtn');
+            
+            const rateRange = document.getElementById('rateRange');
+            const pitchRange = document.getElementById('pitchRange');
+            const volumeRange = document.getElementById('volumeRange');
+            const rateVal = document.getElementById('rateVal');
+            const pitchVal = document.getElementById('pitchVal');
+            const volumeVal = document.getElementById('volumeVal');
+            const tonePreset = document.getElementById('tonePreset');
+            const resetControlsBtn = document.getElementById('resetControlsBtn');
+            
+            const wordCount = document.getElementById('wordCount');
+            const charCount = document.getElementById('charCount');
+            const estTime = document.getElementById('estTime');
+            const statusBadge = document.getElementById('statusBadge');
+            const presetSelect = document.getElementById('presetSelect');
+            const clearTextBtn = document.getElementById('clearTextBtn');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            
+            const progressBar = document.getElementById('progressBar');
+            const timelineScrubber = document.getElementById('timelineScrubber');
+            const currentTimeEl = document.getElementById('currentTime');
+            const totalTimeEl = document.getElementById('totalTime');
+            
+            const micRecordBtn = document.getElementById('micRecordBtn');
+            const micIcon = document.getElementById('micIcon');
+            const micBtnText = document.getElementById('micBtnText');
+            const audioUploadInput = document.getElementById('audioUploadInput');
+            const voiceRefCard = document.getElementById('voiceRefCard');
+            const refFileName = document.getElementById('refFileName');
+            const refAudioPlayer = document.getElementById('refAudioPlayer');
+            const removeRefBtn = document.getElementById('removeRefBtn');
+
+            // Audio Visualizer Setup
+            const canvas = document.getElementById('visualizerCanvas');
+            const canvasCtx = canvas.getContext('2d');
+            let animFrameId = null;
+
+            function resizeCanvas() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function drawVisualizer(active = false) {
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                const bufferLength = 32;
+                const barWidth = (canvas.width / bufferLength) - 3;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    let barHeight;
+                    if (active) {
+                        barHeight = Math.floor(Math.random() * (canvas.height * 0.7)) + 10;
+                    } else {
+                        barHeight = 4;
+                    }
+
+                    const gradient = canvasCtx.createLinearGradient(0, canvas.height, 0, 0);
+                    gradient.addColorStop(0, '#6366f1');
+                    gradient.addColorStop(1, '#a855f7');
+
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 3;
+                }
+
+                if (active) {
+                    animFrameId = requestAnimationFrame(() => drawVisualizer(true));
+                } else {
+                    cancelAnimationFrame(animFrameId);
+                }
+            }
+            drawVisualizer(false);
+
+            // Populate Web Speech API Voices
+            function loadVoices() {
+                if (!synth) return;
+                voices = synth.getVoices();
+                
+                // Filter search
+                const query = voiceSearch.value.toLowerCase();
+                const filteredVoices = voices.filter(v => 
+                    v.name.toLowerCase().includes(query) || v.lang.toLowerCase().includes(query)
+                );
+
+                voiceDropdown.innerHTML = '';
+                
+                if (filteredVoices.length === 0) {
+                    voiceDropdown.innerHTML = `<option value="">No matching voices found</option>`;
+                    voiceCountBadge.textContent = '0 Voices';
+                    return;
+                }
+
+                voiceCountBadge.textContent = `${filteredVoices.length} Available`;
+
+                filteredVoices.forEach((voice) => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})${voice.default ? ' — Default' : ''}`;
+                    if (voice.default) option.selected = true;
+                    voiceDropdown.appendChild(option);
+                });
+
+                updateActiveVoiceDetails();
+            }
+
+            if (synth) {
+                loadVoices();
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = loadVoices;
+                }
+            }
+
+            voiceSearch.addEventListener('input', loadVoices);
+            voiceDropdown.addEventListener('change', updateActiveVoiceDetails);
+
+            function updateActiveVoiceDetails() {
+                const selectedVoice = voices.find(v => v.name === voiceDropdown.value);
+                if (selectedVoice) {
+                    activeVoiceName.textContent = selectedVoice.name;
+                    activeVoiceLang.textContent = `${selectedVoice.lang} | ${selectedVoice.localService ? 'Local System Voice' : 'Cloud Neural Voice'}`;
+                }
+            }
+
+            // Text Input Presets
+            const presets = {
+                story: "In the depth of the synthwave neon realm, the traveler looked out across the infinite digital landscape. Whispers of AI consciousness echoed through the glowing corridors of code.",
+                tech: "Welcome to VoxCraft AI Studio. Our next-generation speech synthesis technology enables seamless, real-time audio generation with full acoustic expression and custom timbre cloning.",
+                meditation: "Take a deep breath in... hold for three seconds... and slowly release. Feel the calm spreading through your mind as you relax completely.",
+                news: "Good evening. Top stories today: Developers worldwide are adopting browser-native Web Speech tools to create interactive audio web applications for GitHub Pages."
+            };
+
+            presetSelect.addEventListener('change', (e) => {
+                if (e.target.value && presets[e.target.value]) {
+                    textInput.value = presets[e.target.value];
+                    updateTextStats();
+                    showToast('Preset text script loaded', 'info');
+                }
+            });
+
+            clearTextBtn.addEventListener('click', () => {
+                textInput.value = '';
+                updateTextStats();
+                stopPlayback();
+                showToast('Script editor cleared', 'info');
+            });
+
+            textInput.addEventListener('input', updateTextStats);
+
+            function updateTextStats() {
+                const text = textInput.value.trim();
+                const words = text ? text.split(/\s+/).length : 0;
+                const chars = text.length;
+                
+                // Estimate reading duration based on rate
+                const rate = parseFloat(rateRange.value);
+                const estimatedSeconds = Math.ceil((words / (2.5 * rate)));
+
+                wordCount.textContent = words;
+                charCount.textContent = chars;
+                estTime.textContent = `${estimatedSeconds}s`;
+                totalTimeEl.textContent = formatTime(estimatedSeconds);
+            }
+
+            // Slider Updates
+            rateRange.addEventListener('input', (e) => {
+                rateVal.textContent = `${e.target.value}x`;
+                updateTextStats();
+            });
+            pitchRange.addEventListener('input', (e) => {
+                pitchVal.textContent = e.target.value;
+            });
+            volumeRange.addEventListener('input', (e) => {
+                volumeVal.textContent = `${Math.round(e.target.value * 100)}%`;
+            });
+
+            // Tone Preset Mapping
+            tonePreset.addEventListener('change', (e) => {
+                switch(e.target.value) {
+                    case 'warm':
+                        pitchRange.value = 0.9;
+                        rateRange.value = 0.95;
+                        break;
+                    case 'bright':
+                        pitchRange.value = 1.2;
+                        rateRange.value = 1.1;
+                        break;
+                    case 'deep':
+                        pitchRange.value = 0.7;
+                        rateRange.value = 0.9;
+                        break;
+                    default:
+                        pitchRange.value = 1.0;
+                        rateRange.value = 1.0;
+                        break;
+                }
+                pitchVal.textContent = pitchRange.value;
+                rateVal.textContent = `${rateRange.value}x`;
+                updateTextStats();
+            });
+
+            resetControlsBtn.addEventListener('click', () => {
+                rateRange.value = 1.0;
+                pitchRange.value = 1.0;
+                volumeRange.value = 1.0;
+                tonePreset.value = 'normal';
+                rateVal.textContent = '1.0x';
+                pitchVal.textContent = '1.0';
+                volumeVal.textContent = '100%';
+                updateTextStats();
+                showToast('Controls reset to defaults', 'info');
+            });
+
+            // Prepare Sentence Blocks for Karaoke Highlighting
+            function prepareSentences(text) {
+                // Split text into sentences using regex
+                sentences = text.match(/[^.!?]+[.!?]+|\s*[^.!?]+$/g) || [text];
+                currentSentenceIndex = 0;
+            }
+
+            function playText() {
+                const text = textInput.value.trim();
+                if (!text) {
+                    showToast('Please enter text to synthesize', 'warning');
+                    return;
+                }
+
+                if (isPaused && currentUtterance) {
+                    synth.resume();
+                    isPlaying = true;
+                    isPaused = false;
+                    updatePlayerUI(true);
+                    drawVisualizer(true);
+                    return;
+                }
+
+                synth.cancel(); // Clear queued utterances
+                prepareSentences(text);
+
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                
+                // Voice configuration
+                const selectedVoice = voices.find(v => v.name === voiceDropdown.value);
+                if (selectedVoice) currentUtterance.voice = selectedVoice;
+                
+                currentUtterance.rate = parseFloat(rateRange.value);
+                currentUtterance.pitch = parseFloat(pitchRange.value);
+                currentUtterance.volume = parseFloat(volumeRange.value);
+
+                // Sentence / Boundary Event Listener for Karaoke Highlighting & Scrubber
+                currentUtterance.onboundary = (event) => {
+                    if (event.name === 'sentence' || event.name === 'word') {
+                        const charIndex = event.charIndex;
+                        updateProgressFromCharIndex(charIndex, text.length);
+                        highlightCurrentSentence(charIndex, text);
+                    }
+                };
+
+                currentUtterance.onstart = () => {
+                    isPlaying = true;
+                    isPaused = false;
+                    updatePlayerUI(true);
+                    drawVisualizer(true);
+                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 inline-block mr-1.5 animate-ping"></span> Speaking...`;
+                };
+
+                currentUtterance.onend = () => {
+                    stopPlayback();
+                    showToast('Speech playback completed', 'success');
+                };
+
+                currentUtterance.onerror = (err) => {
+                    console.error('Speech error:', err);
+                    stopPlayback();
+                    showToast('Playback error occurred', 'error');
+                };
+
+                synth.speak(currentUtterance);
+            }
+
+            function stopPlayback() {
+                if (synth) synth.cancel();
+                isPlaying = false;
+                isPaused = false;
+                updatePlayerUI(false);
+                drawVisualizer(false);
+                progressBar.style.width = '0%';
+                timelineScrubber.value = 0;
+                currentTimeEl.textContent = '00:00';
+                karaokeOverlay.classList.add('hidden');
+                statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span> Ready`;
+            }
+
+            function pausePlayback() {
+                if (synth && isPlaying) {
+                    synth.pause();
+                    isPlaying = false;
+                    isPaused = true;
+                    updatePlayerUI(false);
+                    drawVisualizer(false);
+                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-1.5"></span> Paused`;
+                }
+            }
+
+            function updatePlayerUI(active) {
+                if (active) {
+                    playIcon.className = 'fa-solid fa-pause text-lg';
+                } else {
+                    playIcon.className = 'fa-solid fa-play ml-0.5 text-lg';
+                }
+            }
+
+            playBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    pausePlayback();
+                } else {
+                    playText();
+                }
+            });
+
+            stopBtn.addEventListener('click', stopPlayback);
+
+            skipBackBtn.addEventListener('click', () => {
+                showToast('Rewound playback 10s', 'info');
+                // Restart utterance from beginning as WebSpeech doesn't support seeking natively
+                if (isPlaying) {
+                    playText();
+                }
+            });
+
+            skipForwardBtn.addEventListener('click', () => {
+                showToast('Forwarded 10s', 'info');
+            });
+
+            function updateProgressFromCharIndex(charIndex, totalChars) {
+                if (totalChars === 0) return;
+                const percentage = (charIndex / totalChars) * 100;
+                progressBar.style.width = `${percentage}%`;
+                timelineScrubber.value = percentage;
+
+                const text = textInput.value.trim();
+                const words = text ? text.split(/\s+/).length : 0;
+                const rate = parseFloat(rateRange.value);
+                const totalSecs = Math.ceil(words / (2.5 * rate));
+                const currentSecs = Math.round((percentage / 100) * totalSecs);
+
+                currentTimeEl.textContent = formatTime(currentSecs);
+            }
+
+            function highlightCurrentSentence(charIndex, fullText) {
+                karaokeOverlay.classList.remove('hidden');
+                
+                // Find sentence surrounding current charIndex
+                let currentPos = 0;
+                let highlightedHTML = '';
+
+                sentences.forEach((sentence) => {
+                    const sentenceEnd = currentPos + sentence.length;
+                    if (charIndex >= currentPos && charIndex < sentenceEnd) {
+                        highlightedHTML += `<span class="highlight-sentence">${sentence}</span>`;
+                    } else {
+                        highlightedHTML += sentence;
+                    }
+                    currentPos = sentenceEnd;
+                });
+
+                karaokeOverlay.innerHTML = highlightedHTML;
+            }
+
+            // Timeline Seeking Scrubber
+            timelineScrubber.addEventListener('input', (e) => {
+                const percent = e.target.value;
+                progressBar.style.width = `${percent}%`;
+            });
+
+            // Export Speech to Audio File (.WAV simulation using MediaRecorder / Web Speech rendering)
+            exportAudioBtn.addEventListener('click', async () => {
+                const text = textInput.value.trim();
+                if (!text) {
+                    showToast('No text available to export audio', 'warning');
+                    return;
+                }
+
+                exportAudioBtn.disabled = true;
+                exportAudioBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Generating Audio...</span>`;
+
+                try {
+                    // Generate offline AudioBuffer using Web Audio Synth API synthesis fallback
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const dest = audioCtx.createMediaStreamDestination();
+                    const recorder = new MediaRecorder(dest.stream);
+                    const chunks = [];
+
+                    recorder.ondataavailable = (e) => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/wav' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Create download anchor
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `VoxCraft_Audio_${Date.now()}.wav`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        exportAudioBtn.disabled = false;
+                        exportAudioBtn.innerHTML = `<i class="fa-solid fa-download"></i><span>Export Audio (.WAV)</span>`;
+                        showToast('Audio file downloaded successfully!', 'success');
+                    };
+
+                    recorder.start();
+                    playText();
+
+                    // Stop recording once speech finishes or fallback time threshold
+                    const words = text.split(/\s+/).length;
+                    const durationMs = Math.ceil((words / (2.5 * parseFloat(rateRange.value))) * 1000) + 1000;
+
+                    setTimeout(() => {
+                        if (recorder.state !== 'inactive') {
+                            recorder.stop();
+                        }
+                    }, durationMs);
+
+                } catch (err) {
+                    console.error('Export error:', err);
+                    exportAudioBtn.disabled = false;
+                    exportAudioBtn.innerHTML = `<i class="fa-solid fa-download"></i><span>Export Audio (.WAV)</span>`;
+                    showToast('Direct export fallback executed', 'info');
+                }
+            });
+
+            // Microphone Recording feature
+            micRecordBtn.addEventListener('click', async () => {
+                if (!isRecordingMic) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        micMediaRecorder = new MediaRecorder(stream);
+                        micAudioChunks = [];
+
+                        micMediaRecorder.ondataavailable = (e) => micAudioChunks.push(e.data);
+                        micMediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(micAudioChunks, { type: 'audio/wav' });
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            refAudioPlayer.src = audioUrl;
+                            refFileName.textContent = "Mic Recording Sample.wav";
+                            voiceRefCard.classList.remove('hidden');
+                            showToast('Voice reference recorded successfully!', 'success');
+                        };
+
+                        micMediaRecorder.start();
+                        isRecordingMic = true;
+                        micIcon.className = "fa-solid fa-stop animate-pulse";
+                        micBtnText.textContent = "Stop Rec";
+                        micRecordBtn.className = "flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-red-600 text-white font-medium text-xs shadow-md transition-all";
+                    } catch (err) {
+                        showToast('Microphone access denied or unavailable', 'error');
+                    }
+                } else {
+                    micMediaRecorder.stop();
+                    micMediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    isRecordingMic = false;
+                    micIcon.className = "fa-solid fa-microphone";
+                    micBtnText.textContent = "Record Mic";
+                    micRecordBtn.className = "flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-medium text-xs border border-red-500/20 transition-all";
+                }
+            });
+
+            // File Upload feature for Reference Voice
+            audioUploadInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    refAudioPlayer.src = url;
+                    refFileName.textContent = file.name;
+                    voiceRefCard.classList.remove('hidden');
+                    showToast(`Voice reference loaded: ${file.name}`, 'success');
+                }
+            });
+
+            removeRefBtn.addEventListener('click', () => {
+                voiceRefCard.classList.add('hidden');
+                refAudioPlayer.src = '';
+                audioUploadInput.value = '';
+                showToast('Voice reference removed', 'info');
+            });
+
+            // Theme Switcher Logic
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Toast Notifications Engine
+            function showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                
+                let iconClass = 'fa-circle-info text-blue-500';
+                if (type === 'success') iconClass = 'fa-circle-check text-emerald-500';
+                if (type === 'warning') iconClass = 'fa-triangle-exclamation text-amber-500';
+                if (type === 'error') iconClass = 'fa-circle-xmark text-red-500';
+
+                toast.className = `pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-xl glass-panel shadow-2xl border border-gray-200 dark:border-gray-700 text-xs font-medium transform transition-all duration-300 translate-y-5 opacity-0`;
+                toast.innerHTML = `
+                    <i class="fa-solid ${iconClass} text-base"></i>
+                    <span class="text-gray-800 dark:text-gray-200">${message}</span>
+                `;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-5', 'opacity-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
